@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title> PDD </title>
+    <script type="text/javascript" src="react.js"> </script>
+    <script type="text/javascript" src="react-dom.js"> </script>
+    <script type="text/javascript" src="babel.js"> </script>
+</head>
+
+<body>
+    <div id="main"> </div>
+    <script type="text/babel">
+        class Question extends React.Component
+        {
+            constructor(props)
+            {
+                super(props);
+                this.style={
+                    display: "inline-block",
+                    width: "600px",
+                    backgroundColor: "lightgray"
+                };
+                this.state={
+                    bg: []
+                };
+                this.ans_quantity = props.answers.length;
+                for(let i=0;i<this.ans_quantity;i++)
+                    this.state.bg[i]="lightgray";
+                this.cur_var;
+                this.handleClick=this.handleClick.bind(this);
+            }
+            handleClick(event)
+            {
+                if(!event.target.id) return;
+                if(this.cur_var && (this.cur_var != event.target.id))
+                {
+                    let bg=this.state.bg;
+                    bg[this.cur_var] = "lightgray";
+                    bg[event.target.id]="orange";
+                    this.setState({bg: bg});
+                    this.cur_var=event.target.id;
+                }
+                else
+                {
+                    let bg=this.state.bg;
+                    bg[event.target.id]="orange";
+                    this.setState({bg: bg});
+                    this.cur_var=event.target.id;
+                }
+
+                let e_select = new Event("e_select", {bubbles: true});
+                e_select.ans={q_num: this.props.num, ans_num: +event.target.id};
+                document.dispatchEvent(e_select);
+            }
+            render()
+            {
+                let q_style={
+                    border: "solid 1px black",
+                    backgroundColor: "lightgray"
+                };
+                let ans_style = [];
+                for(let i=0;i<this.ans_quantity;i++)
+                    ans_style[i] = {border: "solid 1px black", backgroundColor: this.props.colors[i] || this.state.bg[i]};
+                
+                return (
+                    <div>
+                        <div style={this.style} onClick={this.handleClick}> 
+                            <div style={q_style}> {this.props.question} </div>
+                            {ans_style.map((ans, i) => <div style={ans} id={i}> {this.props.answers[i]} </div>)}
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                );
+            }
+        }
+
+        class PDD extends React.Component
+        {
+            constructor(props)
+            {
+                super(props);
+                this.handle_select = this.handle_select.bind(this);
+                this.exam = [
+                    {
+                        question: "Вопрос 0",
+                        answers: ["Ответ 1", "Ответ 2", "Ответ 3"],
+                        right_ans: 0
+                    },
+                    {
+                        question: "Вопрос 1",
+                        answers: ["Ответ 1", "Ответ 2", "Ответ 3"],
+                        right_ans: 1
+                    },
+                    {
+                        question: "Вопрос 2",
+                        answers: ["Ответ 1", "Ответ 2"],
+                        right_ans: 0
+                    }
+                ];
+                this.state={
+                    checking: false
+                };
+                this.ans = [];
+                this.false_ans=[];
+                this.handle_check = this.handle_check.bind(this);
+            }
+            componentDidMount()
+            {
+                document.addEventListener("e_select", this.handle_select);
+            }
+            componentWillUnmount()
+            {
+                document.removeEventListener("e_select", this.handle_select);
+            }
+            handle_select(event)
+            {
+                this.ans[event.ans.q_num] = event.ans.ans_num;
+            }
+            handle_check()
+            {
+                this.setState({checking: true});
+            }
+            render()
+            {
+                return (
+                    <div>
+                        {this.exam.map((task, num) => {
+                            let colors=[];
+                            if(!this.state.checking)
+                                return <Question question={task.question} answers={task.answers} num={num} colors={colors} />;
+                            let answer_quantity = task.answers.length;
+                            for(let i=0;i<answer_quantity;i++)
+                                colors[i] = "lightgray";
+                            if(this.ans[num] != this.exam[num].right_ans)
+                            {
+                                colors[this.ans[num]]="red";
+                            }
+                            colors[this.exam[num].right_ans]="green";
+                            return <Question question={task.question} answers={task.answers} num={num} colors={colors} />;
+                        })}
+                        {<input type="button" value="Check" onClick={this.handle_check} />}
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <PDD />,
+            document.querySelector("#main")
+        );
+    </script>
+</body>
+
+</html>
