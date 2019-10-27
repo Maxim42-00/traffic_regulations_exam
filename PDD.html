@@ -3,9 +3,9 @@
 
 <head>
     <title> PDD </title>
-    <script type="text/javascript" src="react.js"> </script>
-    <script type="text/javascript" src="react-dom.js"> </script>
-    <script type="text/javascript" src="babel.js"> </script>
+    <script type="text/javascript" src="https://unpkg.com/react@16.9.0/umd/react.development.js"> </script>
+    <script type="text/javascript" src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"> </script>
+    <script type="text/javascript" src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"> </script>
 </head>
 
 <body>
@@ -67,7 +67,9 @@
                     <div>
                         <div style={this.style} onClick={this.handleClick}> 
                             <div style={q_style}> {this.props.question} </div>
-                            {ans_style.map((ans, i) => <div style={ans} id={i}> {this.props.answers[i]} </div>)}
+                            <ol>
+                            {ans_style.map((ans, i) => <li> <div style={ans} id={i}> {this.props.answers[i]} </div> </li>)}
+                            </ol>
                         </div>
                         <br />
                         <br />
@@ -84,19 +86,25 @@
                 this.handle_select = this.handle_select.bind(this);
                 this.exam = [
                     {
-                        question: "Вопрос 0",
-                        answers: ["Ответ 1", "Ответ 2", "Ответ 3"],
-                        right_ans: 0
-                    },
-                    {
-                        question: "Вопрос 1",
-                        answers: ["Ответ 1", "Ответ 2", "Ответ 3"],
+                        question: "Какие транспортные средства по Правилам относятся к маршрутным транспортным средствам?",
+                        answers: ["1. Все автобусы",
+                                  "2. Автобусы, троллейбусы и трамваи, предназначенные для перевозки людей и движущиеся по установленному маршруту с обозначенными местами остановок.",
+                                  "3. Любые транспортные средства, перевозящие пассажиров."],
                         right_ans: 1
                     },
                     {
-                        question: "Вопрос 2",
-                        answers: ["Ответ 1", "Ответ 2"],
-                        right_ans: 0
+                        question: "При движении на легковом автомобиле, оборудованном ремнями безопасности, пристегиваться ремнями должны:",
+                        answers: ["1. Только водитель.",
+                                  "2. Только водитель и пассажир на переднем сиденье.",
+                                  "3. Все лица, находящиеся в автомобиле"],
+                        right_ans: 2
+                    },
+                    {
+                        question: "В каких случаях вы не должны подавать предупредительный сигнал указателями поворота?",
+                        answers: ["1. Только при отсутствии на дороге других участников движения.",
+                                  "2. Только если сигнал может ввести в заблуждение других участников движения.",
+                                  "3. В обоих перечисленных случаях."],
+                        right_ans: 1
                     }
                 ];
                 this.state={
