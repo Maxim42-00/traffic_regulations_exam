@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <title> ПДД </title>
+    <meta charset="utf-8" />
+    <script type="text/javascript" src="https://unpkg.com/react@16.9.0/umd/react.development.js"> </script>
+    <script type="text/javascript" src="https://unpkg.com/react-dom@16.9.0/umd/react-dom.development.js"> </script>
+    <script type="text/javascript" src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"> </script>
+</head>
+
+<body>
+    <div id="main"> </div>
+    <script type="text/babel">
+        class Question extends React.Component
+        {
+            constructor(props)
+            {
+                super(props);
+                this.style={
+                    display: "inline-block",
+                    width: "600px",
+                    backgroundColor: "lightgray"
+                };
+                this.state={
+                    bg: []
+                };
+                this.ans_quantity = props.answers.length;
+                for(let i=0;i<this.ans_quantity;i++)
+                    this.state.bg[i]="lightgray";
+                this.cur_var;
+                this.handleClick=this.handleClick.bind(this);
+            }
+            handleClick(event)
+            {
+                if(!event.target.id) return;
+                if(this.cur_var && (this.cur_var != event.target.id))
+                {
+                    let bg=this.state.bg;
+                    bg[this.cur_var] = "lightgray";
+                    bg[event.target.id]="orange";
+                    this.setState({bg: bg});
+                    this.cur_var=event.target.id;
+                }
+                else
+                {
+                    let bg=this.state.bg;
+                    bg[event.target.id]="orange";
+                    this.setState({bg: bg});
+                    this.cur_var=event.target.id;
+                }
+
+                let e_select = new Event("e_select", {bubbles: true});
+                e_select.ans={q_num: this.props.num, ans_num: +event.target.id};
+                document.dispatchEvent(e_select);
+            }
+            render()
+            {
+                let q_style={
+                    border: "solid 1px black",
+                    backgroundColor: "lightgray"
+                };
+                let ans_style = [];
+                for(let i=0;i<this.ans_quantity;i++)
+                    ans_style[i] = {border: "solid 1px black", backgroundColor: this.props.colors[i] || this.state.bg[i]};
+                
+                return (
+                    <div>
+                        <div style={this.style} onClick={this.handleClick}> 
+                            <div style={q_style}> {this.props.question} </div>
+                            <ol>
+                            {ans_style.map((ans, i) => <li> <div style={ans} id={i}> {this.props.answers[i]} </div> </li>)}
+                            </ol>
+                        </div>
+                        <br />
+                        <br />
+                    </div>
+                );
+            }
+        }
+
+        class PDD extends React.Component
+        {
+            constructor(props)
+            {
+                super(props);
+                this.handle_select = this.handle_select.bind(this);
+                this.exam = [
+                    {
+                        question: "Какие транспортные средства по Правилам относятся к маршрутным транспортным средствам?",
+                        answers: ["Все автобусы",
+                                  "Автобусы, троллейбусы и трамваи, предназначенные для перевозки людей и движущиеся по установленному маршруту с обозначенными местами остановок.",
+                                  "Любые транспортные средства, перевозящие пассажиров."],
+                        right_ans: 1
+                    },
+                    {
+                        question: "При движении на легковом автомобиле, оборудованном ремнями безопасности, пристегиваться ремнями должны:",
+                        answers: ["Только водитель.",
+                                  "Только водитель и пассажир на переднем сиденье.",
+                                  "Все лица, находящиеся в автомобиле"],
+                        right_ans: 2
+                    },
+                    {
+                        question: "В каких случаях вы не должны подавать предупредительный сигнал указателями поворота?",
+                        answers: ["Только при отсутствии на дороге других участников движения.",
+                                  "Только если сигнал может ввести в заблуждение других участников движения.",
+                                  "В обоих перечисленных случаях."],
+                        right_ans: 1
+                    }
+                ];
+                this.state={
+                    checking: false
+                };
+                this.ans = [];
+                this.false_ans=[];
+                this.handle_check = this.handle_check.bind(this);
+            }
+            componentDidMount()
+            {
+                document.addEventListener("e_select", this.handle_select);
+            }
+            componentWillUnmount()
+            {
+                document.removeEventListener("e_select", this.handle_select);
+            }
+            handle_select(event)
+            {
+                this.ans[event.ans.q_num] = event.ans.ans_num;
+            }
+            handle_check()
+            {
+                this.setState({checking: true});
+            }
+            render()
+            {
+                return (
+                    <div>
+                        {this.exam.map((task, num) => {
+                            let colors=[];
+                            if(!this.state.checking)
+                                return <Question question={task.question} answers={task.answers} num={num} colors={colors} />;
+                            let answer_quantity = task.answers.length;
+                            for(let i=0;i<answer_quantity;i++)
+                                colors[i] = "lightgray";
+                            if(this.ans[num] != this.exam[num].right_ans)
+                            {
+                                colors[this.ans[num]]="red";
+                            }
+                            colors[this.exam[num].right_ans]="green";
+                            return <Question question={task.question} answers={task.answers} num={num} colors={colors} />;
+                        })}
+                        {<input type="button" value="Check" onClick={this.handle_check} />}
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <PDD />,
+            document.querySelector("#main")
+        );
+    </script>
+</body>
+
+</html>
